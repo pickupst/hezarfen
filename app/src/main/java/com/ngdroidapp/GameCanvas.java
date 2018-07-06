@@ -72,8 +72,8 @@ public class GameCanvas extends BaseCanvas {
     }
 
     private void setOther() {
-        seagull.setSeagullTimeSecond(3);
-        seagull.setMaxSeagullCount(10);
+        seagull.setSeagullTimeSecond(3);  //Aşağıda
+        seagull.setMaxSeagullCount((getWidth() / seagull.getSeagullDstW()) * (getHeight() / seagull.getSeagullDstH()) / (seagull.getSeagullDstW() * seagull.getSeagullDstH()));
         seagull.setSeagullCount(0);
         seagull.setSeagullDagree(new int[seagull.getMaxSeagullCount()]);
         seagull.setSeagullDirection(new int[seagull.getMaxSeagullCount()]);

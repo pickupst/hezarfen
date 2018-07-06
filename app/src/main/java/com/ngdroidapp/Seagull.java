@@ -18,7 +18,10 @@ public class Seagull {
     private int seagullDagree[];
     private Bitmap bSeagullIleri[];
     private Rect seagullDestination[], seagullSource, screen;
-    private int seagullDstX[], seagullDstY[], seagullDstW, seagullDstH;
+    private int seagullDstX[];
+    private int seagullDstY[];
+    private int seagullDstW;
+    private int seagullDstH;
     private int seagullTimeSecond;
     private int seagullFrameNum, seagullMaxFrameNum;
     private int seagullSpeed;
@@ -127,12 +130,36 @@ public class Seagull {
             Log.i("seagullCount", "drawSeagull: " + seagullCount);
     }
 
-    private void vSeagullCreate(){
+    private void vSeagullCreate(int vTabanAdet, int index, int width, int height){
         //en fazla ekranın yarısın kaplayabilir
         vTabanAdet = randomGenerator.nextInt((gameCanvas.getHeight() / 2) / seagullDstH); //v şeklindeki kuşların taban boyu
-        for (int i = 0; i < vTabanAdet; i++){ //o kadar seagull oluşturacağız
 
+        int dikeyYatay = randomGenerator.nextInt(2);
+        int dikeyYatay2 = randomGenerator.nextInt(2);
 
+        for (int i = 0; i < vTabanAdet; i++){ //Derinlik kadar
+
+            if (dikeyYatay == 0) {
+                if (dikeyYatay2 == 0) {
+                    seagullDirection[index] = 3; //2 yukarı 1 sola 3 sağa 0 aşağı
+                    seagullDstX[index] = 0 - (seagullDstW * vTabanAdet);    // DERİNLİK
+                    seagullDstY[index] = randomGenerator.nextInt(height - (vTabanAdet * seagullDstH));
+                } else if (dikeyYatay2 == 1) {
+                    seagullDirection[index] = 1; //2 yukarı 1 sola 3 sağa 0 aşağı
+                    seagullDstX[index] = width + (seagullDstW * vTabanAdet); // DERİNLİK
+                    seagullDstY[index] = randomGenerator.nextInt(height - (vTabanAdet * seagullDstH));
+                }
+            } else if (dikeyYatay == 1) {
+                if (dikeyYatay2 == 0) {
+                    seagullDirection[index] = 0; //2 yukarı 1 sola 3 sağa 0 aşağı
+                    seagullDstX[index] = randomGenerator.nextInt(width - (seagullDstW * vTabanAdet));
+                    seagullDstY[index] = 0 - (vTabanAdet * seagullDstH);    // DERİNLİK
+                } else if (dikeyYatay2 == 1) {
+                    seagullDirection[index] = 2; //2 yukarı 1 sola 3 sağa 0 aşağı
+                    seagullDstX[index] = randomGenerator.nextInt(width - (seagullDstW * vTabanAdet));
+                    seagullDstY[index] = height + (vTabanAdet * seagullDstH);   // DERİNLİK
+                }
+            }
 
         }
 
@@ -299,5 +326,14 @@ public class Seagull {
 
     public void setTimeMax(int timeMax) {
         this.timeMax = timeMax;
+    }
+
+
+    public int getSeagullDstW() {
+        return seagullDstW;
+    }
+
+    public int getSeagullDstH() {
+        return seagullDstH;
     }
 }
