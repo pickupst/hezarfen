@@ -28,9 +28,9 @@ public class GameCanvas extends BaseCanvas {
     private Seagull seagull;
     private Coin coin;
 
-    private static long startTime;
+    private static long startTime, vStartTime;
 
-    private static int nowTime;
+    private static int nowTime, vNowTime;
 
     public Random randomGenerator;
 
@@ -38,7 +38,6 @@ public class GameCanvas extends BaseCanvas {
     private Rect backGroundSource, backGroundDestination;
     private int bgScreenW, bgScreenH;
     private int bgScreenStartX, bgScreenStartY;
-
 
     private boolean isTouch;
 
@@ -72,16 +71,18 @@ public class GameCanvas extends BaseCanvas {
     }
 
     private void setOther() {
+
+        randomGenerator = new Random();
+
+        seagull.setvSeagullTimeSecond(randomGenerator.nextInt(Seagull.getvTimeMax()) + Seagull.getvTimeMin());
         seagull.setSeagullTimeSecond(3);  //Aşağıda
-        seagull.setMaxSeagullCount((getWidth() / seagull.getSeagullDstW()) * (getHeight() / seagull.getSeagullDstH()) / (seagull.getSeagullDstW() * seagull.getSeagullDstH()));
+        seagull.setMaxSeagullCount(100);
         seagull.setSeagullCount(0);
         seagull.setSeagullDagree(new int[seagull.getMaxSeagullCount()]);
         seagull.setSeagullDirection(new int[seagull.getMaxSeagullCount()]);
         seagull.setSeagullDstX(new int[seagull.getMaxSeagullCount()]);
         seagull.setSeagullDstY(new int[seagull.getMaxSeagullCount()]);
         seagull.setSeagullOnScreen(new boolean[seagull.getMaxSeagullCount()]);
-
-        randomGenerator = new Random();
 
         screenMidPointX = getWidth() / 2;
         screenMidPointY = getHeight() / 2;
@@ -119,6 +120,7 @@ public class GameCanvas extends BaseCanvas {
         }
 
         startTime = System.currentTimeMillis();
+        vStartTime = System.currentTimeMillis();
         isTouch = false;
 
         setOther();
@@ -127,6 +129,7 @@ public class GameCanvas extends BaseCanvas {
         setBackGround();
 
         coin.setCoin(getWidth(), getHeight());
+
     }
 
     public void update() {
@@ -189,17 +192,33 @@ public class GameCanvas extends BaseCanvas {
         return rect1.intersect(rect2);
     }
 
-    public void createSeagull() {
+    private void createSeagull() {
 
         nowTime =(int) ((System.currentTimeMillis() - startTime) / 1000);
+        vNowTime =(int) ((System.currentTimeMillis() - vStartTime) / 1000);
 
         if (seagull.getSeagullTimeSecond() == nowTime && seagull.getSeagullCount() < seagull.getMaxSeagullCount()) {
             //Log.i("count","OLUŞTURULDU SANİYE: " + nowTime);
-            nowTime = 0;
             startTime = System.currentTimeMillis();
             seagull.setSeagull(getWidth(),getHeight());
             //Log.i("seagullCount", "createSeagull: " + seagullCount);
         }
+
+         if (seagull.getvSeagullTimeSecond() == vNowTime && seagull.getSeagullCount() < seagull.getMaxSeagullCount()) {
+
+            seagull.setvSeagullTimeSecond(randomGenerator.nextInt(Seagull.getvTimeMax()) + Seagull.getvTimeMin());
+            //Log.i("count","OLUŞTURULDU SANİYE: " + vNowTime);
+            vNowTime = 0;
+             vStartTime = System.currentTimeMillis();
+            createVSeagull();
+            //Log.i("seagullCount", "createSeagull: " + seagullCount);
+        }
+
+    }
+
+    private void createVSeagull(){
+
+        seagull.vSeagullCreate(randomGenerator.nextInt(((getHeight() / 2) / seagull.getSeagullDstH()) - 3 ) + 3, getWidth(),getHeight()); //v şeklindeki kuşların taban boy
 
     }
 

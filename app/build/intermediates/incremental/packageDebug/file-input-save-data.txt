@@ -1,5 +1,5 @@
 #Internal package file, do not edit.
-#Wed Jul 04 16:22:11 GMT+03:00 2018
+#Mon Jul 09 13:05:11 GMT+03:00 2018
 210.set=ANDROID_RESOURCE
 14.set=ANDROID_RESOURCE
 180.file=C\:\\dev\\android\\workspace\\NgdroidApp\\app\\build\\intermediates\\res\\resources-debug.ap_\\res\\layout\\abc_action_menu_item_layout.xml

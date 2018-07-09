@@ -14,6 +14,8 @@ public class Seagull {
     private NgApp root;
     GameCanvas gameCanvas;
 
+
+
     private int scale;
     private int seagullDagree[];
     private Bitmap bSeagullIleri[];
@@ -23,6 +25,7 @@ public class Seagull {
     private int seagullDstW;
     private int seagullDstH;
     private int seagullTimeSecond;
+    private int vSeagullTimeSecond;
     private int seagullFrameNum, seagullMaxFrameNum;
     private int seagullSpeed;
     private int seagullDirection[];
@@ -32,6 +35,9 @@ public class Seagull {
     private Random randomGenerator;
     private int timeMin;
     private int timeMax;
+    private static int vTimeMax;
+    private static int vTimeMin;
+
     private int vTabanAdet;
 
 
@@ -40,15 +46,20 @@ public class Seagull {
         this.randomGenerator = new Random();
         screen = new Rect();
 
+        vTimeMax = 3;
+        vTimeMin = 3;
+
         this.root = root;
 
     }
 
     public void setSeagull(int width, int height) {
+        vTabanAdet = 0;
+
         timeMax = 5;
         timeMin = 5;
 
-        screen.set(0 - seagullDstW * 2,0 - seagullDstH * 2, width + seagullDstW, height + seagullDstW); //Ekranın dışına çıkma durumunu kontrol edeceğiz.
+        screen.set(0 - seagullDstW * 2 - (vTabanAdet * seagullDstW),0 - seagullDstH * 2 - (vTabanAdet * seagullDstH), width + seagullDstW + (vTabanAdet * seagullDstW), height + seagullDstW + (vTabanAdet * seagullDstH)); //Ekranın dışına çıkma durumunu kontrol edeceğiz.
 
         scale = 2;
         seagullTimeSecond = randomGenerator.nextInt(timeMax) + timeMin;
@@ -85,7 +96,7 @@ public class Seagull {
             Log.i("count", "setSeagull: " + seagullCount);
 
 
-            seagullOnScreen[seagullCount] = true;
+            seagullOnScreen[seagullCount] = false;
             seagullCount++;
         }
     }
@@ -130,40 +141,70 @@ public class Seagull {
             Log.i("seagullCount", "drawSeagull: " + seagullCount);
     }
 
-    private void vSeagullCreate(int vTabanAdet, int index, int width, int height){
+    public void vSeagullCreate(int vTabanAdet, int width, int height){
         //en fazla ekranın yarısın kaplayabilir
-        vTabanAdet = randomGenerator.nextInt((gameCanvas.getHeight() / 2) / seagullDstH); //v şeklindeki kuşların taban boyu
 
-        int dikeyYatay = randomGenerator.nextInt(2);
-        int dikeyYatay2 = randomGenerator.nextInt(2);
+        Log.i("vSea", "taban V: " + vTabanAdet);
+        int kullanilabilirSeagull = 0;
 
-        for (int i = 0; i < vTabanAdet; i++){ //Derinlik kadar
+        for (int i = 0; i < seagullCount; i++) {
 
-            if (dikeyYatay == 0) {
-                if (dikeyYatay2 == 0) {
-                    seagullDirection[index] = 3; //2 yukarı 1 sola 3 sağa 0 aşağı
-                    seagullDstX[index] = 0 - (seagullDstW * vTabanAdet);    // DERİNLİK
-                    seagullDstY[index] = randomGenerator.nextInt(height - (vTabanAdet * seagullDstH));
-                } else if (dikeyYatay2 == 1) {
-                    seagullDirection[index] = 1; //2 yukarı 1 sola 3 sağa 0 aşağı
-                    seagullDstX[index] = width + (seagullDstW * vTabanAdet); // DERİNLİK
-                    seagullDstY[index] = randomGenerator.nextInt(height - (vTabanAdet * seagullDstH));
-                }
-            } else if (dikeyYatay == 1) {
-                if (dikeyYatay2 == 0) {
-                    seagullDirection[index] = 0; //2 yukarı 1 sola 3 sağa 0 aşağı
-                    seagullDstX[index] = randomGenerator.nextInt(width - (seagullDstW * vTabanAdet));
-                    seagullDstY[index] = 0 - (vTabanAdet * seagullDstH);    // DERİNLİK
-                } else if (dikeyYatay2 == 1) {
-                    seagullDirection[index] = 2; //2 yukarı 1 sola 3 sağa 0 aşağı
-                    seagullDstX[index] = randomGenerator.nextInt(width - (seagullDstW * vTabanAdet));
-                    seagullDstY[index] = height + (vTabanAdet * seagullDstH);   // DERİNLİK
-                }
-            }
+            if (getSeagullOnScreen(i) == false) kullanilabilirSeagull++;
+            else kullanilabilirSeagull--;
 
         }
 
+        Log.i("inScreen", "KullanılabilirSeagull: " + kullanilabilirSeagull);
 
+        if (kullanilabilirSeagull >= (vTabanAdet * 2)) {
+
+            Log.i("vSea", "taban V: " + vTabanAdet);
+
+            int index = 0;
+
+            int dikeyYatay = randomGenerator.nextInt(2);
+            int dikeyYatay2 = randomGenerator.nextInt(2);
+
+            int randY = randomGenerator.nextInt(height - (vTabanAdet * seagullDstH));
+            int randX = randomGenerator.nextInt(width - (seagullDstW * vTabanAdet));
+
+            for (int i = vTabanAdet; i > 0; i--) { //Derinlik kadar
+                Log.i("vSea", "i : " + i);
+                for (int j = 0; j < 2; j++) { //Her derinlikte iki kuş
+                    Log.i("vSea", "j : " + j);
+                    if (getSeagullOnScreen(index) == false) {//False ise ekranda değildir
+                        Log.i("vSea", "getonindex index: " + index + " deger : " + getSeagullOnScreen(index));
+                        if (dikeyYatay == 0) {
+                            if (dikeyYatay2 == 0) {
+                                seagullDirection[index] = 3; //2 yukarı 1 sola 3 sağa 0 aşağı
+                                seagullDstX[index] = 0 - (seagullDstW * i);    // DERİNLİK
+                                seagullDstY[index] = randY + (((seagullDstH / 2) * i) * j) - (Math.abs((seagullDstH / 2) * (j - 1) * i));
+                            } else if (dikeyYatay2 == 1) {
+                                seagullDirection[index] = 1; //2 yukarı 1 sola 3 sağa 0 aşağı
+                                seagullDstX[index] = width + (seagullDstW * i); // DERİNLİK
+                                seagullDstY[index] = randY + (((seagullDstH / 2) * i) * j) - (Math.abs((seagullDstH / 2) * (j - 1) * i));
+                            }
+                        } else if (dikeyYatay == 1) {
+                            if (dikeyYatay2 == 0) {
+                                seagullDirection[index] = 0; //2 yukarı 1 sola 3 sağa 0 aşağı
+                                seagullDstY[index] = 0 - (i * seagullDstH);    // DERİNLİK
+                                seagullDstX[index] = randX + (((seagullDstW / 2) * i) * j) - (Math.abs((seagullDstW / 2) * (j - 1) * i));
+                            } else if (dikeyYatay2 == 1) {
+                                seagullDirection[index] = 2; //2 yukarı 1 sola 3 sağa 0 aşağı
+                                seagullDstX[index] = randX + (((seagullDstW / 2) * i) * j) - (Math.abs((seagullDstW / 2) * (j - 1) * i));
+                                seagullDstY[index] = height + (i * seagullDstH);   // DERİNLİK
+                            }
+                        }
+
+                        seagullOnScreen[index] = true;
+                        seagullAciHesapla(index);
+                    }
+                    index++;
+                }
+
+            }
+
+        }
     }
 
     public void seagullMove(int geciciX, int geciciY) {
@@ -186,6 +227,7 @@ public class Seagull {
             seagullDstY[i] -= geciciY * 5;
             seagullDstX[i] -= geciciX * 5;
             seagullOnScreen(i);
+            Log.i("inScreen", "seagullMove: " + i + ". Kuş " + seagullOnScreen[i]);
         }
     }
 
@@ -221,7 +263,7 @@ public class Seagull {
                 seagullKonumYonBelirle(index,gameCanvas.getWidth(), gameCanvas.getHeight());
                 seagullAciHesapla(index);
             }
-        }
+        }else setSeagullOnScreen(index, true);
 
         Log.i("seagullTimeSecond", "seagullOnScreen: " + seagullTimeSecond + "  " + gameCanvas.getNowTime() + "  " +gameCanvas.getStartTime());
 
@@ -335,5 +377,25 @@ public class Seagull {
 
     public int getSeagullDstH() {
         return seagullDstH;
+    }
+
+    public int getvTabanAdet() {
+        return vTabanAdet;
+    }
+
+    public int getvSeagullTimeSecond() {
+        return vSeagullTimeSecond;
+    }
+
+    public void setvSeagullTimeSecond(int vSeagullTimeSecond) {
+        this.vSeagullTimeSecond = vSeagullTimeSecond;
+    }
+
+    public static int getvTimeMax() {
+        return vTimeMax;
+    }
+
+    public static int getvTimeMin() {
+        return vTimeMin;
     }
 }

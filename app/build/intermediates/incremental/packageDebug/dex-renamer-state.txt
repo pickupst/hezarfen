@@ -1,4 +1,4 @@
-#Fri Jul 06 10:06:42 GMT+03:00 2018
+#Mon Jul 09 13:05:11 GMT+03:00 2018
 base.0=C\:\\dev\\android\\workspace\\NgdroidApp\\app\\build\\intermediates\\transforms\\dex\\debug\\folders\\1000\\1f\\main
 renamed.0=classes.dex
 file.0=C\:\\dev\\android\\workspace\\NgdroidApp\\app\\build\\intermediates\\transforms\\dex\\debug\\folders\\1000\\1f\\main\\classes.dex
