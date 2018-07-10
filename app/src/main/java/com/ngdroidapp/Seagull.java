@@ -127,7 +127,6 @@ public class Seagull {
                 seagullDstY[index] = height + seagullDstH;
             }
         }
-
     }
 
     public void drawSeagull(Canvas canvas, int index) {
@@ -304,6 +303,10 @@ public class Seagull {
 
     public Rect[] getSeagullDestination() {
         return seagullDestination;
+    }
+
+    public Rect getSeagullDestination(int index) {
+        return seagullDestination[index];
     }
 
     public void setSeagullDestination(Rect[] seagullDestination) {

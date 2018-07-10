@@ -24,11 +24,15 @@ import istanbul.gamelab.ngdroid.util.Utils;
 
 public class GameCanvas extends BaseCanvas {
 
+    private int goldPoint;
+
+    private boolean isGameOver;
+
     private Player player;
     private Seagull seagull;
     private Coin coin;
 
-    private static long startTime, vStartTime;
+    private static long startTime, vStartTime, coinStartTime;
 
     private static int nowTime, vNowTime;
 
@@ -72,6 +76,7 @@ public class GameCanvas extends BaseCanvas {
 
     private void setOther() {
 
+        goldPoint = 0;
         randomGenerator = new Random();
 
         seagull.setvSeagullTimeSecond(randomGenerator.nextInt(Seagull.getvTimeMax()) + Seagull.getvTimeMin());
@@ -111,6 +116,8 @@ public class GameCanvas extends BaseCanvas {
 
     public void setup() {
 
+        isGameOver = false;
+
         player = new Player(root);
         seagull = new Seagull(root);
         coin = new Coin(root);
@@ -121,6 +128,8 @@ public class GameCanvas extends BaseCanvas {
 
         startTime = System.currentTimeMillis();
         vStartTime = System.currentTimeMillis();
+        coinStartTime = System.currentTimeMillis();
+
         isTouch = false;
 
         setOther();
@@ -141,20 +150,57 @@ public class GameCanvas extends BaseCanvas {
 
         if (seagull.getSeagullCount() >= 0) seagull.seagullMove(geciciX, geciciY); //ekranda martı varsa
 
+        createCoin();
+
         coin.coinAnimation();
     }
 
     public void draw(Canvas canvas) {
-        drawBackGround(canvas);
-        player.drawPlayer(canvas,screenMidPointX, screenMidPointY);
 
-        for (int i = 0; i < seagull.getSeagullCount(); i++) {
+        if (isGameOver == false) {
 
-             if (seagull.getSeagullCount() >= 0 ) seagull.drawSeagull(canvas,i); //ekranda martı varsa
+            drawBackGround(canvas);
+            player.drawPlayer(canvas, screenMidPointX, screenMidPointY);
+
+            for (int i = 0; i < seagull.getSeagullCount(); i++) {
+                if (seagull.getSeagullCount() >= 0) {
+                    seagull.drawSeagull(canvas, i); //ekranda martı varsa
+                    kusVSplayerCarpisma(i);
+                }
+            }
+
+            for (int i = 0; i < coin.getCoinCount(); i++) {
+                coin.drawCoins(canvas, geciciX, geciciY, i);
+                coinVSplayerCarpisma(i);
+            }
+        }else {
+
+            Log.i("coinCount", "draw: " + coin.getCoinCount());
+
+        }
+    }
+
+    private void kusVSplayerCarpisma(int index){
+
+        //Player kuşa çarparsa gameOver
+        if (isColliding(player.getCol(), seagull.getSeagullDestination(index))){
+
+            //GAME OVERR
+            isGameOver = true;
 
         }
 
-        coin.drawCoins(canvas, geciciX, geciciY);
+    }
+
+    public void coinVSplayerCarpisma(int index){
+
+        //Player kuşa çarparsa gameOver
+        if (isColliding(player.getCol(), coin.getCoinDestination(index))){
+
+            goldPoint ++;
+
+            Log.i("goldPoint", "GOLD POİNT: " + goldPoint);
+        }
 
     }
 
@@ -213,6 +259,20 @@ public class GameCanvas extends BaseCanvas {
             createVSeagull();
             //Log.i("seagullCount", "createSeagull: " + seagullCount);
         }
+
+    }
+
+    private void createCoin(){
+
+        nowTime =(int) ((System.currentTimeMillis() - coinStartTime) / 1000);
+
+        if (coin.getCoinTimeSecond() == nowTime && coin.getCoinCount() < coin.getCoinMaxDestination()) {
+            //Log.i("count","OLUŞTURULDU SANİYE: " + nowTime);
+            coinStartTime = System.currentTimeMillis();
+            coin.coinCreate();
+            //Log.i("seagullCount", "createSeagull: " + seagullCount);
+        }
+
 
     }
 
@@ -318,7 +378,6 @@ public class GameCanvas extends BaseCanvas {
     public void setStartTime(long startTime) {
         this.startTime = startTime;
     }
-
 
     public int getNowTime() {
         return nowTime;

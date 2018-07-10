@@ -16,11 +16,11 @@ public class Player {
     private Rect playerDestination, playerSource;
     private int playerSrcX, playerSrcY, playerSrcW, playerSrcH;
     private int playerDstX, playerDstY, playerDstW, playerDstH;
-    private int playerW, playerH;
     private int playerFrameNum, animationType, maxFrameNum;
     private int playerSpeed, playerDirection;
     private int playerDagree;
     private NgApp root;
+    private Rect col;
 
     private GameCanvas gameCanvas;
 
@@ -32,6 +32,8 @@ public class Player {
     }
 
     public void setPlayer(int getWidth, int getHeight) {
+        col = new Rect();
+
         maxFrameNum = 5;
         bPlayerIleri = new Bitmap[maxFrameNum];
         for (int i = 0; i < maxFrameNum; i++) {
@@ -52,6 +54,7 @@ public class Player {
         playerDstX = (getWidth / 2) - (playerSrcW / 2);
         playerDstY = (getHeight / 2) - (playerSrcH / 2);
 
+
         playerFrameNum = 0;
         animationType = 2;
         playerSpeed = 2;
@@ -67,6 +70,10 @@ public class Player {
 
         gameCanvas.drawRectBorder(canvas, playerDestination, Color.RED);
         canvas.drawBitmap(bPlayerIleri[playerFrameNum], rotatePlayer(screenMidPointX, screenMidPointY, playerDstW, playerDstH, playerDagree) , null);
+
+        col.set(playerDstX + 50, playerDstY + 50, playerDstX + playerDstW - 50, playerDstY + playerDstH - 50);
+        //Collider Border
+        gameCanvas.drawRectBorder(canvas, col, Color.CYAN);
     }
 
     public void playerMove(boolean isTouch, int touchCount, boolean isRectTouches[],Rect leftLane, Rect rightLane, Rect rectTouches[]) {
@@ -156,5 +163,9 @@ public class Player {
 
     public int getPlayerDagree() {
         return playerDagree;
+    }
+
+    public Rect getCol() {
+        return col;
     }
 }

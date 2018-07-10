@@ -16,14 +16,21 @@ public class Coin {
     private int coinsSrcW[];
     private Random randomGenerator;
     private Bitmap coins[];
-    private Rect coinSource, coinDestination[];
+    private Rect coinSource;
+    private Rect[] coinDestination;
     private int coinSrcX, coinSrcY, coinSrcH;
     private int coinDstX[], coinDstY[], coinDstW, coinDstH, coinIndex;
-    private int coinFrameNum, coinMaxFrameNum, coinMaxDestination;
+    private int coinFrameNum;
+    private int coinMaxFrameNum;
+    private int coinMaxDestination;
     private NgApp root;
+    private int sagsol;
+
+    private int coinCount;
+    private int coinTimeSecond;
+    private int timeMin, timeMax;
 
     public Coin(NgApp root) {
-
         gameCanvas = new GameCanvas(root);
         randomGenerator = new Random();
         this.root = root;
@@ -31,6 +38,11 @@ public class Coin {
     }
 
     public void setCoin(int width, int height) {
+        timeMax = 5;
+        timeMin = 5;
+        coinCount = 0;
+
+        coinTimeSecond = randomGenerator.nextInt(timeMax) + timeMin;
 
         coinMaxDestination = 10;
         randomGenerator = new Random();
@@ -55,26 +67,52 @@ public class Coin {
             coins[i] = Utils.loadImage(root, "coins/coin" + i + ".png");
             coinsSrcW[i] = coins[i].getWidth();
         }
-        for (int k = 0; k < coinMaxDestination; k++) {
-            coinDstX[k] = randomGenerator.nextInt(width - coinDstW);
-            coinDstY[k] = randomGenerator.nextInt(height - coinDstH);
-        }
 
         coinSource.set(coinSrcX, coinSrcY, coinSrcX + coinsSrcW[coinFrameNum], coinSrcY + coinSrcH);
         for (int i = 0; i < coinMaxDestination; i++) {
             coinDestination[i] = new Rect();
-            coinDestination[i].set(coinDstX[i], coinDstY[i], coinDstX[i] + coinDstW, coinDstY[i] + coinDstH);
+
         }
+
     }
 
-    public void drawCoins(Canvas canvas, int geciciX, int geciciY) {
+    public void coinCreate(){
 
-        for (int i = 0; i < coinMaxDestination; i++) {
+            sagsol = randomGenerator.nextInt(100);
+            Log.d("sagsol", "setCoin: " + sagsol);
+            if (sagsol % 4 == 0) {
+                coinDstX[coinCount] = randomGenerator.nextInt(gameCanvas.getWidth() - coinDstW);
+                coinDstY[coinCount] = 0 - coinDstH;
+                Log.d("solx", "setCoin: " + coinDstX[coinCount]);
+            }
+            else if (sagsol % 4 == 1) {
+                coinDstY[coinCount] = randomGenerator.nextInt(gameCanvas.getHeight() - coinDstH);
+                coinDstX[coinCount] = 0 - coinDstW;
+                Log.d("sagx", "setCoin: " + coinDstX[coinCount]);
+            }
+            else if (sagsol % 4 == 2) {
+                coinDstX[coinCount] = randomGenerator.nextInt(gameCanvas.getWidth() - coinDstW);
+                coinDstY[coinCount] = gameCanvas.getHeight() + coinDstH;
+                Log.d("solx", "setCoin: " + coinDstX[coinCount]);
+            }
+            else if (sagsol % 4 == 3) {
+                coinDstY[coinCount] = randomGenerator.nextInt(gameCanvas.getHeight() - coinDstH);
+                coinDstX[coinCount] = gameCanvas.getWidth() + coinDstW;
+                Log.d("sagx", "setCoin: " + coinDstX[coinCount]);
+            }
+            coinTimeSecond = randomGenerator.nextInt(timeMax) + timeMin;
+
+            coinDestination[coinCount].set(coinDstX[coinCount], coinDstY[coinCount], coinDstX[coinCount] + coinDstW, coinDstY[coinCount] + coinDstH);
+
+            coinCount++;
+    }
+
+    public void drawCoins(Canvas canvas, int geciciX, int geciciY, int i) {
+
             gameCanvas.drawRectBorder(canvas, coinDestination[i], Color.GREEN);
             canvas.drawBitmap(coins[coinFrameNum], coinSource, coinDestination[i], null);
             Log.d("kontrol", "coinIndexControl: " + i);
             coinMove(i, geciciX, geciciY);
-        }
     }
 
     public void coinAnimation() {
@@ -89,5 +127,21 @@ public class Coin {
         coinDstY[i] -= geciciY * 5;
         coinDstX[i] -= geciciX * 5;
         coinDestination[i].set(coinDstX[i], coinDstY[i], coinDstX[i] + coinDstW, coinDstY[i] + coinDstH);
+    }
+
+    public int getCoinCount() {
+        return coinCount;
+    }
+
+    public int getCoinMaxDestination() {
+        return coinMaxDestination;
+    }
+
+    public int getCoinTimeSecond() {
+        return coinTimeSecond;
+    }
+
+    public Rect getCoinDestination(int index) {
+        return coinDestination[index];
     }
 }
