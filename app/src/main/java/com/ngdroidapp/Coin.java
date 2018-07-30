@@ -8,6 +8,7 @@ import android.util.Log;
 
 import java.util.Random;
 
+import istanbul.gamelab.ngdroid.core.NgMediaPlayer;
 import istanbul.gamelab.ngdroid.util.Utils;
 
 public class Coin {
@@ -29,6 +30,9 @@ public class Coin {
     private int coinCount;
     private int coinTimeSecond;
     private int timeMin, timeMax;
+
+    private NgMediaPlayer coinSound;
+    private boolean coinSoundEnable;
 
     public Coin(NgApp root) {
         gameCanvas = new GameCanvas(root);
@@ -63,6 +67,12 @@ public class Coin {
         coins = new Bitmap[coinMaxFrameNum];
         coinsSrcW = new int[coinMaxFrameNum];
 
+        coinSoundEnable = false;
+        coinSound = new NgMediaPlayer(root);
+        coinSound.load("sound/coin.mp3");
+        coinSound.prepare();
+        coinSound.setLooping(false);
+
         for (int i = 0; i < coinMaxFrameNum; i++) {
             coins[i] = Utils.loadImage(root, "coins/coin" + i + ".png");
             coinsSrcW[i] = coins[i].getWidth();
@@ -76,35 +86,37 @@ public class Coin {
 
     }
 
-    public void coinCreate(){
+    public void coinCreate(int index){
 
             sagsol = randomGenerator.nextInt(100);
             Log.d("sagsol", "setCoin: " + sagsol);
             if (sagsol % 4 == 0) {
-                coinDstX[coinCount] = randomGenerator.nextInt(gameCanvas.getWidth() - coinDstW);
-                coinDstY[coinCount] = 0 - coinDstH;
-                Log.d("solx", "setCoin: " + coinDstX[coinCount]);
+                coinDstX[index] = randomGenerator.nextInt(gameCanvas.getWidth() - coinDstW);
+                coinDstY[index] = 0 - coinDstH;
+                Log.d("solx", "setCoin: " + coinDstX[index]);
             }
             else if (sagsol % 4 == 1) {
-                coinDstY[coinCount] = randomGenerator.nextInt(gameCanvas.getHeight() - coinDstH);
-                coinDstX[coinCount] = 0 - coinDstW;
-                Log.d("sagx", "setCoin: " + coinDstX[coinCount]);
+                coinDstY[index] = randomGenerator.nextInt(gameCanvas.getHeight() - coinDstH);
+                coinDstX[index] = 0 - coinDstW;
+                Log.d("sagx", "setCoin: " + coinDstX[index]);
             }
             else if (sagsol % 4 == 2) {
-                coinDstX[coinCount] = randomGenerator.nextInt(gameCanvas.getWidth() - coinDstW);
-                coinDstY[coinCount] = gameCanvas.getHeight() + coinDstH;
-                Log.d("solx", "setCoin: " + coinDstX[coinCount]);
+                coinDstX[index] = randomGenerator.nextInt(gameCanvas.getWidth() - coinDstW);
+                coinDstY[index] = gameCanvas.getHeight() + coinDstH;
+                Log.d("solx", "setCoin: " + coinDstX[index]);
             }
             else if (sagsol % 4 == 3) {
-                coinDstY[coinCount] = randomGenerator.nextInt(gameCanvas.getHeight() - coinDstH);
-                coinDstX[coinCount] = gameCanvas.getWidth() + coinDstW;
-                Log.d("sagx", "setCoin: " + coinDstX[coinCount]);
+                coinDstY[index] = randomGenerator.nextInt(gameCanvas.getHeight() - coinDstH);
+                coinDstX[index] = gameCanvas.getWidth() + coinDstW;
+                Log.d("sagx", "setCoin: " + coinDstX[index]);
             }
             coinTimeSecond = randomGenerator.nextInt(timeMax) + timeMin;
 
-            coinDestination[coinCount].set(coinDstX[coinCount], coinDstY[coinCount], coinDstX[coinCount] + coinDstW, coinDstY[coinCount] + coinDstH);
+            coinDestination[index].set(coinDstX[index], coinDstY[index], coinDstX[index] + coinDstW, coinDstY[index] + coinDstH);
 
-            coinCount++;
+            if (index == coinCount) coinCount++;
+
+
     }
 
     public void drawCoins(Canvas canvas, int geciciX, int geciciY, int i) {
@@ -127,6 +139,12 @@ public class Coin {
         coinDstY[i] -= geciciY * 5;
         coinDstX[i] -= geciciX * 5;
         coinDestination[i].set(coinDstX[i], coinDstY[i], coinDstX[i] + coinDstW, coinDstY[i] + coinDstH);
+    }
+
+    public void startCoinSound() {
+
+        coinSound.start();
+
     }
 
     public int getCoinCount() {

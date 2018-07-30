@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.util.Log;
 
 import java.util.Random;
@@ -23,46 +24,44 @@ import istanbul.gamelab.ngdroid.util.Utils;
 
 
 public class GameCanvas extends BaseCanvas {
-
-    private int goldPoint;
+    private Score score;
 
     private boolean isGameOver;
+    private static long startTime;
+    private static int nowTime;
+    public Random randomGenerator;
+    private boolean isTouch;
+    private Rect rightLane, leftLane;
+    public int screenMidPointX, screenMidPointY;
+    private Rect rectTouches[];
+    private boolean isRectTouches[];
+    private int touchCount;
+    private int geciciX, geciciY;
+
+    private static int goldPoint;
+    private Coin coin;
+    private static long coinStartTime;
 
     private Player player;
+    private Explosion[] explosion;
+
+    private Enemy enemy;
+    private static long enemyStartTime;
+
     private Seagull seagull;
-    private Coin coin;
-
-    private static long startTime, vStartTime, coinStartTime;
-
-    private static int nowTime, vNowTime;
-
-    public Random randomGenerator;
+    private static long vStartTime;
+    private static int vNowTime;
 
     private Bitmap backGround;
     private Rect backGroundSource, backGroundDestination;
     private int bgScreenW, bgScreenH;
     private int bgScreenStartX, bgScreenStartY;
 
-    private boolean isTouch;
-
-    private Rect rightLane, leftLane;
-
-    public int screenMidPointX, screenMidPointY;
-
-    private Rect rectTouches[];
-    private boolean isRectTouches[];
-
-    private int touchCount;
-
-    private int geciciX, geciciY;
-
-
-
     private void setBackGround() {
         bgScreenH = getHeight() / 5;
         bgScreenW = getWidth() / 5;
 
-        backGround = Utils.loadImage(root, "background.jpg");
+        backGround = Utils.loadImage(root, "background.png");
 
         backGroundSource = new Rect();
         backGroundDestination = new Rect();
@@ -88,6 +87,14 @@ public class GameCanvas extends BaseCanvas {
         seagull.setSeagullDstX(new int[seagull.getMaxSeagullCount()]);
         seagull.setSeagullDstY(new int[seagull.getMaxSeagullCount()]);
         seagull.setSeagullOnScreen(new boolean[seagull.getMaxSeagullCount()]);
+
+        enemy.setEnemyTimeSecond(3);  //Aşağıda
+        enemy.incMaxEnemyCount(5);
+        enemy.setEnemyCount(0);
+        enemy.setEnemyDagree(new int[enemy.getMaxEnemyCount()]);
+        enemy.setEnemyDstX(new float[enemy.getMaxEnemyCount()]);
+        enemy.setEnemyDstY(new float[enemy.getMaxEnemyCount()]);
+        enemy.setEnemyOnScreen(new boolean[enemy.getMaxEnemyCount()]);
 
         screenMidPointX = getWidth() / 2;
         screenMidPointY = getHeight() / 2;
@@ -119,48 +126,86 @@ public class GameCanvas extends BaseCanvas {
         isGameOver = false;
 
         player = new Player(root);
+        enemy = new Enemy(root);
         seagull = new Seagull(root);
         coin = new Coin(root);
+        score = new Score(root);
 
-        for (int i = 0; i < seagull.getMaxSeagullCount(); i++) {
+        for (int i = 0; i < seagull.getMaxSeagullCount(); i++) {    //ilk başta tüm nesnelerimiz ekranda değil
             seagull.setSeagullOnScreen(i,false);
+        }
+
+        for (int i = 0; i < enemy.getMaxEnemyCount(); i++) {    //ilk başta tüm nesnelerimiz ekranda değil
+            enemy.setEnemyOnScreen(i,false);
         }
 
         startTime = System.currentTimeMillis();
         vStartTime = System.currentTimeMillis();
         coinStartTime = System.currentTimeMillis();
+        enemyStartTime = System.currentTimeMillis();
 
         isTouch = false;
 
         setOther();
         player.setPlayer(getWidth(), getHeight());
-        //setSeagull();
+        enemy.setEnemy(getWidth(), getHeight());
         setBackGround();
 
         coin.setCoin(getWidth(), getHeight());
 
+        score.setScore();
+        explosion = new Explosion[enemy.getMaxEnemyCount()];
+        for (int i = 0; i < enemy.getMaxEnemyCount(); i++) {
+            explosion[i] = new Explosion(root);
+        }
+
+    }
+
+    private void gameOver(){
+        if (isGameOver) {
+            MenuCanvas mc = new MenuCanvas(root);
+            root.canvasManager.setCurrentCanvas(mc);
+        }
     }
 
     public void update() {
 
+        gameOver();
+
         backgroundMove();
         player.playerMove(isTouch, touchCount, isRectTouches, leftLane, rightLane, rectTouches);
+        enemy.enemyMove(geciciX, geciciY);
 
         createSeagull();
+        createEnemy();
 
         if (seagull.getSeagullCount() >= 0) seagull.seagullMove(geciciX, geciciY); //ekranda martı varsa
+        //if (enemy.getEnemyCount() >= 0) enemy.enemyMove(geciciX, geciciY); //ekranda düşman varsa
 
         createCoin();
 
         coin.coinAnimation();
+
+        score.distanceUpdatingScore();
+
+        for (int i = 0; i < enemy.getMaxEnemyCount(); i++) {
+            explosion[i].explosionAnimation(geciciX, geciciY);
+        }
+
     }
 
     public void draw(Canvas canvas) {
 
-        if (isGameOver == false) {
-
             drawBackGround(canvas);
             player.drawPlayer(canvas, screenMidPointX, screenMidPointY);
+            score.drawScore(canvas);
+
+            for (int i = 0; i < enemy.getEnemyCount(); i++) {
+                if (enemy.getEnemyCount() >= 0) {
+                    enemy.drawEnemy(canvas, i);
+                    enemyCarpisma(i);
+                }
+            }
 
             for (int i = 0; i < seagull.getSeagullCount(); i++) {
                 if (seagull.getSeagullCount() >= 0) {
@@ -173,12 +218,17 @@ public class GameCanvas extends BaseCanvas {
                 coin.drawCoins(canvas, geciciX, geciciY, i);
                 coinVSplayerCarpisma(i);
             }
-        }else {
 
-            Log.i("coinCount", "draw: " + coin.getCoinCount());
+            for (int j = 0; j < enemy.getEnemyCount(); j++) { // patlama için
 
-        }
+                for (int i = 0; i < enemy.getMaxEnemyCount(); i++) {
+                    explosion[i].drawExplosion(canvas,j);
+                }
+
+            }
     }
+
+
 
     private void kusVSplayerCarpisma(int index){
 
@@ -192,14 +242,52 @@ public class GameCanvas extends BaseCanvas {
 
     }
 
+    private void enemyCarpisma(int index){
+
+        //Player enemye çarparsa gameOver
+        if (isColliding(enemy.getCol(index), player.getCol())){
+
+            //GAME OVERR
+
+            isGameOver = true;
+
+        } else {
+
+            for (int i = 0; i < enemy.getEnemyCount(); i++){  //Düşman Düşmana çarparsa
+
+                if (index != i){ //Kendi kendisine çarpmasını istemeyiz :)
+                    if (isColliding(enemy.getCol(index), enemy.getCol(i))){
+                            if (!explosion[i].isExpIsLive()){
+                                explosion[i].setExplosion(enemy, index, player);
+                                break;
+                            }
+                        enemy.enemyKonumBelirle(index,getWidth(),getHeight()); //Yeniden konumlandıralım
+                        enemy.enemyKonumBelirle(i,getWidth(),getHeight());
+                        explosion[i].startExplosionSound();
+
+                    }
+                }
+
+            }
+
+        }
+
+    }
+
+
     public void coinVSplayerCarpisma(int index){
 
-        //Player kuşa çarparsa gameOver
+        //Player altına çarparsa
         if (isColliding(player.getCol(), coin.getCoinDestination(index))){
 
-            goldPoint ++;
+            coin.coinCreate(index);
+            coin.startCoinSound();
+
+            goldPoint += 50;
 
             Log.i("goldPoint", "GOLD POİNT: " + goldPoint);
+
+
         }
 
     }
@@ -226,8 +314,7 @@ public class GameCanvas extends BaseCanvas {
         geciciY = -1 * (int) Math.round((player.getPlayerSpeed() * Math.cos(Math.toRadians(player.getPlayerDagree()))));
 
         if (Math.abs(geciciX) == 1 && Math.abs(geciciY) == 1 ) {
-            //geciciX = geciciX * 2; //45 DERECE AÇI OLDUĞUNDA HER İKİSİ DE BİR OLUYOR VE BİRDEN PLAYER YAVAŞLIYOR.
-            geciciY = geciciY * 2;
+           geciciY = geciciY * 2;
         }
         bgScreenStartY += geciciY; //yukarı Git
         bgScreenStartX += geciciX;
@@ -238,16 +325,27 @@ public class GameCanvas extends BaseCanvas {
         return rect1.intersect(rect2);
     }
 
+    public boolean isColliding(RectF rect1, RectF rect2) {
+        return rect1.intersect(rect2);
+    }
+
+    public boolean isColliding(RectF rect1, Rect rect2) {
+        RectF gecici = new RectF();
+        gecici.set((float) rect2.left, (float) rect2.top, (float) rect2.right, (float) rect2.bottom);
+
+        return rect1.intersect(gecici);
+    }
+
     private void createSeagull() {
 
         nowTime =(int) ((System.currentTimeMillis() - startTime) / 1000);
         vNowTime =(int) ((System.currentTimeMillis() - vStartTime) / 1000);
 
         if (seagull.getSeagullTimeSecond() == nowTime && seagull.getSeagullCount() < seagull.getMaxSeagullCount()) {
-            //Log.i("count","OLUŞTURULDU SANİYE: " + nowTime);
+
             startTime = System.currentTimeMillis();
-            seagull.setSeagull(getWidth(),getHeight());
-            //Log.i("seagullCount", "createSeagull: " + seagullCount);
+            seagull.setSeagull(getWidth(), getHeight());
+
         }
 
          if (seagull.getvSeagullTimeSecond() == vNowTime && seagull.getSeagullCount() < seagull.getMaxSeagullCount()) {
@@ -262,6 +360,20 @@ public class GameCanvas extends BaseCanvas {
 
     }
 
+
+
+    private void createEnemy() {
+
+        nowTime =(int) ((System.currentTimeMillis() - enemyStartTime) / 1000);
+
+        if (enemy.getEnemyTimeSecond() == nowTime && enemy.getEnemyCount() < enemy.getMaxEnemyCount()) {
+
+            enemyStartTime = System.currentTimeMillis();
+            enemy.setEnemy(getWidth(),getHeight());
+
+        }
+    }
+
     private void createCoin(){
 
         nowTime =(int) ((System.currentTimeMillis() - coinStartTime) / 1000);
@@ -269,7 +381,8 @@ public class GameCanvas extends BaseCanvas {
         if (coin.getCoinTimeSecond() == nowTime && coin.getCoinCount() < coin.getCoinMaxDestination()) {
             //Log.i("count","OLUŞTURULDU SANİYE: " + nowTime);
             coinStartTime = System.currentTimeMillis();
-            coin.coinCreate();
+            Log.i("coinCount", "createCoin: " + coin.getCoinCount());
+            coin.coinCreate(coin.getCoinCount());
             //Log.i("seagullCount", "createSeagull: " + seagullCount);
         }
 
@@ -278,7 +391,8 @@ public class GameCanvas extends BaseCanvas {
 
     private void createVSeagull(){
 
-        seagull.vSeagullCreate(randomGenerator.nextInt(((getHeight() / 2) / seagull.getSeagullDstH()) - 3 ) + 3, getWidth(),getHeight()); //v şeklindeki kuşların taban boy
+        //Sıfıra bölme hatası olmaması için
+        if (seagull.getSeagullDstH() != 0) seagull.vSeagullCreate(randomGenerator.nextInt(((getHeight() / 2) / seagull.getSeagullDstH()) - 3 ) + 3, getWidth(),getHeight()); //v şeklindeki kuşların taban boy
 
     }
 
@@ -387,4 +501,12 @@ public class GameCanvas extends BaseCanvas {
         this.nowTime = nowTime;
     }
 
+
+    public static int getGoldPoint() {
+        return goldPoint;
+    }
+
+    public static void setGoldPoint(int add) {
+        goldPoint += add;
+    }
 }

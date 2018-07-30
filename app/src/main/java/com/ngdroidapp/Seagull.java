@@ -14,8 +14,6 @@ public class Seagull {
     private NgApp root;
     GameCanvas gameCanvas;
 
-
-
     private int scale;
     private int seagullDagree[];
     private Bitmap bSeagullIleri[];
@@ -37,7 +35,6 @@ public class Seagull {
     private int timeMax;
     private static int vTimeMax;
     private static int vTimeMin;
-
     private int vTabanAdet;
 
 
@@ -75,17 +72,19 @@ public class Seagull {
             seagullDstW = 55 * scale;
             seagullDstH = 35 * scale;
 
+            seagullSource = new Rect();
+
             if (seagullOnScreen[seagullCount] == false) {
                 for (int i = 0; i < maxSeagullCount; i++) {
                     seagullDestination[i] = new Rect();
                 }
 
+                //Burada animasyon start olacak
                 for (int i = 0; i < seagullMaxFrameNum; i++) {
                     bSeagullIleri[i] = Utils.loadImage(root, "seagull/seagull" + i + ".png");
                     bSeagullIleri[i] = Bitmap.createScaledBitmap(bSeagullIleri[i],seagullDstW, seagullDstH,false);
                 }
             }
-            seagullSource = new Rect();
 
             seagullKonumYonBelirle(seagullCount, width, height);
 
@@ -93,8 +92,6 @@ public class Seagull {
             seagullSpeed = 12;
 
             seagullAciHesapla(seagullCount);
-            Log.i("count", "setSeagull: " + seagullCount);
-
 
             seagullOnScreen[seagullCount] = false;
             seagullCount++;
@@ -136,7 +133,8 @@ public class Seagull {
             seagullDestination[index].set(seagullDstX[index], seagullDstY[index], seagullDstX[index] + seagullDstW, seagullDstY[index] + seagullDstH);
             //Log.i("seagulDest", "X :" + seagullDstX + " Y :" + seagullDstY + " X2:" + (seagullDstX + seagullDstW) + " Y2 :" + (seagullDstY + seagullDstH) + "  " + getWidth() + "  " + getHeight());
             gameCanvas.drawRectBorder(canvas, seagullDestination[index], Color.BLUE);
-            canvas.drawBitmap(bSeagullIleri[seagullFrameNum], Player.rotatePlayer(seagullDstX[index] + seagullDstW / 2, seagullDstY[index] + seagullDstH / 2, seagullDstW, seagullDstH, seagullDagree[index]), null);
+            canvas.drawBitmap(bSeagullIleri[seagullFrameNum], Player.rotatePlayer(seagullDstX[index] + seagullDstW / 2,
+                    seagullDstY[index] + seagullDstH / 2, seagullDstW, seagullDstH, seagullDagree[index]), null);
             Log.i("seagullCount", "drawSeagull: " + seagullCount);
     }
 

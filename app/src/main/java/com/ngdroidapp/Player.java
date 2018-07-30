@@ -12,10 +12,15 @@ import istanbul.gamelab.ngdroid.util.Utils;
 
 public class Player {
 
+    private int rotationSpeed;
+
     private Bitmap bPlayerIleri[];
     private Rect playerDestination, playerSource;
     private int playerSrcX, playerSrcY, playerSrcW, playerSrcH;
-    private int playerDstX, playerDstY, playerDstW, playerDstH;
+    private int playerDstX;
+    private int playerDstY;
+    private int playerDstW;
+    private int playerDstH;
     private int playerFrameNum, animationType, maxFrameNum;
     private int playerSpeed, playerDirection;
     private int playerDagree;
@@ -57,7 +62,8 @@ public class Player {
 
         playerFrameNum = 0;
         animationType = 2;
-        playerSpeed = 2;
+        playerSpeed = 3;
+        rotationSpeed = 2;
         playerDirection = 2; // 2 ileri,,, 1 sola, 3 Sağa
 
     }
@@ -67,6 +73,7 @@ public class Player {
 
         playerSource.set(playerSrcX, playerSrcY, playerSrcX + playerSrcW, playerSrcY + playerSrcH);
         playerDestination.set(playerDstX, playerDstY, playerDstX + playerDstW, playerDstY + playerDstH);
+
 
         gameCanvas.drawRectBorder(canvas, playerDestination, Color.RED);
         canvas.drawBitmap(bPlayerIleri[playerFrameNum], rotatePlayer(screenMidPointX, screenMidPointY, playerDstW, playerDstH, playerDagree) , null);
@@ -83,7 +90,7 @@ public class Player {
             playerFrameNum = 0;
         }
 
-        playerYonBelirle(isTouch, touchCount, isRectTouches, leftLane, rightLane, rectTouches);
+        playerYonBelirle( isTouch, touchCount, isRectTouches, leftLane, rightLane, rectTouches);
 
     }
 
@@ -136,13 +143,13 @@ public class Player {
         //Açısını değiştirerek dönmesini sağlıyoruz.
         if (playerDirection == 3) { //sağa da git
             if (playerDagree == 360) playerDagree = 0;
-            playerDagree ++;
+            playerDagree += rotationSpeed;
             Log.i("degree", "sağa Açımız: " + playerDagree);
 
         }
         else if (playerDirection == 1) { //sola da git
             if (playerDagree == 0) playerDagree = 360;
-            playerDagree --;
+            playerDagree -= rotationSpeed;
             Log.i("degree", "sola Açımız: " + playerDagree);
 
         }
@@ -167,5 +174,14 @@ public class Player {
 
     public Rect getCol() {
         return col;
+    }
+
+
+    public int getPlayerDstW() {
+        return playerDstW;
+    }
+
+    public int getPlayerDstH() {
+        return playerDstH;
     }
 }
